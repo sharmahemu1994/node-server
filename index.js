@@ -9,6 +9,8 @@ const https = require('https');
 const url = require('url');
 const stringDecoder = require('string_decoder').StringDecoder;
 const fs = require('fs');
+const handlers = require('./lib/handler');
+const helpers = require('./lib/helpers');
 
 // instinciating http server
 const httpServer = http.createServer((req, res) => {
@@ -73,7 +75,7 @@ const unifiedServer = (req, res) => {
 			queryString,
 			method,
 			headers,
-			payload
+			payload: helpers.parseJsonToObject(payload)
 		}
 
 		chooseHandler(data, (statusCode, payload) => {
@@ -85,7 +87,6 @@ const unifiedServer = (req, res) => {
 
 			const payloadString = JSON.stringify(payload);
 
-
 			// send the response
 			res.setHeader('Content-Type', 'application/json');
 			res.writeHead(statusCode);
@@ -96,30 +97,13 @@ const unifiedServer = (req, res) => {
 		});
 
 	});
-}
-
-
-// define handlers
-
-let handlers = {};
-
-// sample handler
-handlers.ping = (data, cb) => {
-	// callback http status code and payload object
-	cb(200);
-}
-
-// no handler found
-handlers.notFound = (data,cb) => {
-	cb(404)
-}
+};
 
 // defining a request router
 const router = {
-	'ping': handlers.ping
+	'ping': handlers.ping,
+	'users': handlers.users
 }
-
-
 
 /*
 	Destructuring concept
