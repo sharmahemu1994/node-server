@@ -6,6 +6,7 @@
  // Dependencies
 
 const server = require('./server');
+const cli = require('./lib/cli');
 
 // container for app
 
@@ -16,6 +17,11 @@ const app = {};
 app.init = () => {
 	// start server
 	server.init();
+
+	// star server CLI
+	setTimeout(() => {
+		cli.init();
+	}, 100);
 };
 
 // execute init function

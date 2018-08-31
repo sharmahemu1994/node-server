@@ -11,6 +11,8 @@ const stringDecoder = require('string_decoder').StringDecoder;
 const fs = require('fs');
 const handlers = require('./lib/handler');
 const helpers = require('./lib/helpers');
+const util = require('util');
+const debug = util.debuglog('server');
 
 // create server container
 const server = {};
@@ -71,44 +73,73 @@ server.unifiedServer = (req, res) => {
             payload: helpers.parseJsonToObject(payload)
         }
 
-        chooseHandler(data, (statusCode, payload, contentType) => {
-
-            console.log('----dasda-------', data);
-            // determine the type of response (fallback to json);
-            contentType = typeof (contentType) === 'string' ? contentType : 'json';
-
-            // define default status code
-            statusCode = typeof (statusCode) === 'number' ? statusCode : 200;
-            let payloadString = '';
-
-            // Return the response part as content specific
-            if (contentType == 'json') {
-                res.setHeader('Content-Type', 'application/json');
-                payload = typeof (payload) == 'object' ? payload : {};
-                payloadString = JSON.stringify(payload);
-            }
-
-            if (contentType == 'html') {
-                res.setHeader('Content-Type', 'text/html');
-                payloadString = typeof (payload) == 'string' ? payload : '';
-            }
-
-            // Return the response parts that are common to all content=types
-            res.writeHead(statusCode);
-            res.end(payloadString);
-
-            // log the request path
-            console.log('----statusCode---:', statusCode, 'payloadString::', payloadString);
-        });
-
+        try {
+            chooseHandler(data, (statusCode, payload, contentType) => {
+                server.processHandlerResponse(res, method, trimmedPath, statusCode, payload, contentType);
+            });
+        } catch (error) {
+            debug(error);
+            server.processHandlerResponse(res, method, trimmedPath, 500, {error:'unknown error has occured'}, 'json');
+        }
     });
 };
+
+server.processHandlerResponse = (res, method, trimmedPath, statusCode, payload, contentType) => {
+    // determine the type of response (fallback to json);
+    contentType = typeof (contentType) === 'string' ? contentType : 'json';
+
+    // define default status code
+    statusCode = typeof (statusCode) === 'number' ? statusCode : 200;
+    
+    // Return the response part as content specific
+    let payloadString = '';
+
+    if (contentType == 'json') {
+        res.setHeader('Content-Type', 'application/json');
+        payload = typeof (payload) == 'object' ? payload : {};
+        payloadString = JSON.stringify(payload);
+    }
+
+    if (contentType == 'html') {
+        res.setHeader('Content-Type', 'text/html');
+        payloadString = typeof (payload) == 'string' ? payload : '';
+    }
+
+    if (contentType == 'favicon') {
+        res.setHeader('Content-Type', 'image/x-icon');
+        payloadString = typeof (payload) == 'undefined' ? payload : '';
+    }
+
+    if (contentType == 'css') {
+        res.setHeader('Content-Type', 'text/css');
+        payloadString = typeof (payload) == 'undefined' ? payload : '';
+    }
+
+    if (contentType == 'html') {
+        res.setHeader('Content-Type', 'image/png');
+        payloadString = typeof (payload) == 'undefined' ? payload : '';
+    }
+
+    if (contentType == 'jpg') {
+        res.setHeader('Content-Type', 'image/jpeg');
+        payloadString = typeof (payload) == 'undefined' ? payload : '';
+    }
+    
+    if (contentType == 'plain') {
+        res.setHeader('Content-Type', 'text/plain');
+        payloadString = typeof (payload) == 'undefined' ? payload : '';
+    }
+    // Return the response parts that are common to all content=types
+    res.writeHead(statusCode);
+    res.end(payloadString);
+}
 
 // defining a request router
 server.router = {
     'ping': handlers.ping,
     'users': handlers.users,
-    'index': handlers.index
+    'index': handlers.index,
+    'example/error': handlers.exampleError
 }
 
 
