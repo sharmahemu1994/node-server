@@ -36,7 +36,6 @@ server.handleRequest = (req, res) => {
 
 	req.on('end', () => {
 		payload += decoder.end();
-		console.log('-------router.routes[trimmedPath]------', router[trimmedPath]);
 		// choose handler this request should go else go to notFound
 		const chooseHandler = typeof (router[trimmedPath]) !== 'undefined' ? router[trimmedPath] : (data, callback) => {
 			helpers.getTempalte('error', (err, str) => {
