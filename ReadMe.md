@@ -41,7 +41,7 @@ Output:
 
 ## Getting Started -
 
-Once AlterNLU is set up [See Setting Up](#setting-Up), you can try it out in 4 simple steps.
+Once AlterNLU is set up [See Setting Up](#setting-Up--), you can try it out in 4 simple steps.
 
 * Get Training Data. [Recommended : Use Kontiki Console](https://yarnpkg.com/lang/en/docs/install/#mac-stable)
 
